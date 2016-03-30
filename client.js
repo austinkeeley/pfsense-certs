@@ -7,7 +7,7 @@ request = request.defaults({jar: true});
 
 
 /*
- * Logs into pfSense
+ * Logs into pfSense and sets the global session ID
  */
 var login = function(hostname, username, password, cb) {
   var promise = pRequest.create(request);
@@ -39,10 +39,14 @@ var login = function(hostname, username, password, cb) {
   });
 };
 
-var getUsers = function(hostname, token, cb) {
+/*
+ * Gets the pfSense users
+ */
+var getUsers = function(hostname, cb) {
   request.get('http://' + hostname + '/system_usermanager.php', function(err, response) {
     var $ = cheerio.load(response.body);
     var results = [];
+    var id = 0;
     $('.sortable > tbody > tr').map(function(index, row) {
       var cols = [];
       $(row).find('td').each(function(index, col) {
@@ -54,6 +58,7 @@ var getUsers = function(hostname, token, cb) {
       var groups = cols[6].trim().split(',');
 
       results.push({
+        id: id++,
         username: username,
         fullName: fullName,
         disabled: disabled,
@@ -65,15 +70,7 @@ var getUsers = function(hostname, token, cb) {
   });
 };
 
-var hostname = '192.168.56.101'
-
-login(hostname, 'admin', 'pfsense', function(err, token) {
-  if (err) {
-    console.log(err);
-    return;
-  }
-  getUsers(hostname, token, function(err, users) {
-    console.log(users);
-  });
-
-});
+module.exports = {
+  login: login,
+  getUsers: getUsers
+};
