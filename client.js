@@ -3,7 +3,10 @@ var fScraper = require('form-scraper');
 var pRequest = require('promisified-request');
 var cheerio = require('cheerio');
 
-request = request.defaults({jar: true});
+request = request.defaults({
+  jar: true,
+  proxy: 'http://localhost:8080'
+});
 
 
 /*
@@ -44,33 +47,78 @@ var login = function(hostname, username, password, cb) {
  */
 var getUsers = function(hostname, cb) {
   request.get('http://' + hostname + '/system_usermanager.php', function(err, response) {
-    var $ = cheerio.load(response.body);
-    var results = [];
-    var id = 0;
-    $('.sortable > tbody > tr').map(function(index, row) {
-      var cols = [];
-      $(row).find('td').each(function(index, col) {
-        cols.push($(col).text());
-      });
-      var username = cols[1].trim();
-      var fullName = cols[4].trim();
-      var disabled = cols[5].trim() === '*';
-      var groups = cols[6].trim().split(',');
+      var $ = cheerio.load(response.body);
+      var results = [];
+      var id = 0;
+      $('.sortable > tbody > tr').map(function(index, row) {
+        var cols = [];
+        $(row).find('td').each(function(index, col) {
+          cols.push($(col).text());
+        });
+        var username = cols[1].trim();
+        var fullName = cols[4].trim();
+        var disabled = cols[5].trim() === '*';
+        var groups = cols[6].trim().split(',');
 
-      results.push({
-        id: id++,
-        username: username,
-        fullName: fullName,
-        disabled: disabled,
-        groups: groups
-      });
+        results.push({
+          id: id++,
+          username: username,
+          fullName: fullName,
+          disabled: disabled,
+          groups: groups
+        });
 
+      });
+      cb(null, results);
+});
+};
+
+
+/*
+ * Gets the certificates and private keys for a user
+ */
+var getCerts = function(hostname, userID, cb) {
+
+  console.log('in get certs');
+  var promise = pRequest.create(request);
+  var formStructure = fScraper.fetchForm('#iform2', 'http://' + hostname + '/system_usermanager.php', promise);
+  formStructure.then(function(form) {
+    request.post('http://' + hostname + '/system_usermanager.php', {
+      form: {
+        __csrf_magic: form.data.__csrf_magic,
+        act: 'edit',
+        userid: userID
+      }
+    }, function(err, response) {
+
+      var $ = cheerio.load(response.body);
+      var rows = $('table[summary="certificates"] tr');
+      rows = rows.slice(1, rows.length - 1);
+      var results = [];
+
+      rows.map(function(index, row) {
+        var cols = [];
+        $(row).find('td').each(function(index, col) {
+          cols.push($(col).text());
+        });
+
+        var certName = cols[0].trim();
+        var rootCAName = cols[1].trim();
+        results.push({
+          name: certName,
+          ca: rootCAName
+        });
+
+      });
+      cb(null, results);
     });
-    cb(null, results);
+
   });
+
 };
 
 module.exports = {
   login: login,
-  getUsers: getUsers
+  getUsers: getUsers,
+  getCerts: getCerts
 };
