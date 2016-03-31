@@ -1,12 +1,16 @@
 {
   "name": "pfsense-certs",
   "version": "0.1.0",
-  "description": "A simple library for downloading certificates and keys from pfSense.",
+  "description": "A library for downloading certificates and keys from pfSense.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Austin Keeley",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/austinkeeley/pfsense-certs.git"
+  },
   "license": "MIT",
   "dependencies": {
     "cheerio": "^0.20.0",
