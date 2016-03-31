@@ -11,6 +11,7 @@
     "type": "git",
     "url": "https://github.com/austinkeeley/pfsense-certs.git"
   },
+  "keywords": ["pfsense", "certificates"],
   "license": "MIT",
   "dependencies": {
     "cheerio": "^0.20.0",
