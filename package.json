@@ -1,5 +1,5 @@
 {
-  "name": "pfsense-user-tool",
+  "name": "pfsense-certs",
   "version": "0.1.0",
   "description": "A simple library for downloading certificates and keys from pfSense.",
   "main": "index.js",

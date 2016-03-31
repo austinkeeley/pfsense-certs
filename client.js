@@ -5,7 +5,6 @@ var cheerio = require('cheerio');
 
 request = request.defaults({
   jar: true,
-  proxy: 'http://localhost:8080'
 });
 
 
@@ -79,7 +78,6 @@ var getUsers = function(hostname, cb) {
  */
 var getCerts = function(hostname, userID, cb) {
 
-  console.log('in get certs');
   var promise = pRequest.create(request);
   var formStructure = fScraper.fetchForm('#iform2', 'http://' + hostname + '/system_usermanager.php', promise);
   formStructure.then(function(form) {
@@ -95,6 +93,7 @@ var getCerts = function(hostname, userID, cb) {
       var rows = $('table[summary="certificates"] tr');
       rows = rows.slice(1, rows.length - 1);
       var results = [];
+      var certID = 0;
 
       rows.map(function(index, row) {
         var cols = [];
@@ -105,6 +104,7 @@ var getCerts = function(hostname, userID, cb) {
         var certName = cols[0].trim();
         var rootCAName = cols[1].trim();
         results.push({
+          id: certID++,
           name: certName,
           ca: rootCAName
         });
@@ -114,11 +114,53 @@ var getCerts = function(hostname, userID, cb) {
     });
 
   });
+};
 
+/*
+ * Exports a single certificate
+ */
+var exportCert = function(hostname, userID, certID, cb) {
+  var promise = pRequest.create(request);
+  var formStructure = fScraper.fetchForm('#iform2', 'http://' + hostname + '/system_usermanager.php', promise);
+  formStructure.then(function(form) {
+    request.post('http://' + hostname + '/system_usermanager.php', {
+      form: {
+        __csrf_magic: form.data.__csrf_magic,
+        act: 'expcert',
+        userid: userID,
+        certid: certID
+      }
+    }, function(err, response) {
+      cb(null, response.body);
+    });
+  });
+};
+
+
+/*
+ * Exports a single private key
+ */
+var exportKey = function(hostname, userID, certID, cb) {
+  var promise = pRequest.create(request);
+  var formStructure = fScraper.fetchForm('#iform2', 'http://' + hostname + '/system_usermanager.php', promise);
+  formStructure.then(function(form) {
+    request.post('http://' + hostname + '/system_usermanager.php', {
+      form: {
+        __csrf_magic: form.data.__csrf_magic,
+        act: 'expckey',
+        userid: userID,
+        certid: certID
+      }
+    }, function(err, response) {
+      cb(null, response.body);
+    });
+  });
 };
 
 module.exports = {
   login: login,
   getUsers: getUsers,
-  getCerts: getCerts
+  getCerts: getCerts,
+  exportCert: exportCert,
+  exportKey: exportKey
 };
