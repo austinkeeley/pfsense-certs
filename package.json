@@ -1,6 +1,6 @@
 {
   "name": "pfsense-certs",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A library for downloading certificates and keys from pfSense.",
   "main": "index.js",
   "scripts": {
