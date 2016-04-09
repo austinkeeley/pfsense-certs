@@ -95,11 +95,18 @@ var getCerts = function(session, userID, cb) {
 /*
  * Exports a single certificate
  */
-var exportCert = function(hostname, userID, certID, cb) {
-  var promise = pRequest.create(request);
-  var formStructure = fScraper.fetchForm('#iform2', 'http://' + hostname + '/system_usermanager.php', promise);
+var exportCert = function(session, userID, certID, cb) {
+
+  var r = request.defaults({
+    headers: {
+      'Cookie': 'PHPSESSID=' + session.token
+    }
+  });
+
+  var promise = pRequest.create(r);
+  var formStructure = fScraper.fetchForm('#iform2', 'http://' + session.hostname + '/system_usermanager.php', promise);
   formStructure.then(function(form) {
-    request.post('http://' + hostname + '/system_usermanager.php', {
+    r.post('http://' + session.hostname + '/system_usermanager.php', {
       form: {
         __csrf_magic: form.data.__csrf_magic,
         act: 'expcert',
@@ -109,6 +116,9 @@ var exportCert = function(hostname, userID, certID, cb) {
     }, function(err, response) {
       cb(null, response.body);
     });
+  },
+  function(err) {
+    cb(err, null);
   });
 };
 
@@ -116,11 +126,18 @@ var exportCert = function(hostname, userID, certID, cb) {
 /*
  * Exports a single private key
  */
-var exportKey = function(hostname, userID, certID, cb) {
-  var promise = pRequest.create(request);
-  var formStructure = fScraper.fetchForm('#iform2', 'http://' + hostname + '/system_usermanager.php', promise);
+var exportKey = function(session, userID, certID, cb) {
+
+  var r = request.defaults({
+    headers: {
+      'Cookie': 'PHPSESSID=' + session.token
+    }
+  });
+
+  var promise = pRequest.create(r);
+  var formStructure = fScraper.fetchForm('#iform2', 'http://' + session.hostname + '/system_usermanager.php', promise);
   formStructure.then(function(form) {
-    request.post('http://' + hostname + '/system_usermanager.php', {
+    r.post('http://' + session.hostname + '/system_usermanager.php', {
       form: {
         __csrf_magic: form.data.__csrf_magic,
         act: 'expckey',
@@ -130,6 +147,9 @@ var exportKey = function(hostname, userID, certID, cb) {
     }, function(err, response) {
       cb(null, response.body);
     });
+  },
+  function(err) {
+    cb(err, null);
   });
 };
 
