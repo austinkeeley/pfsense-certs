@@ -1,6 +1,6 @@
 {
   "name": "pfsense-certs",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A library for downloading certificates and keys from pfSense.",
   "main": "index.js",
   "scripts": {
@@ -16,10 +16,12 @@
     "certificates"
   ],
   "license": "MIT",
+  "peerDependencies": {
+    "pfsense-session": "^0.1.0"
+  },
   "dependencies": {
     "cheerio": "^0.20.0",
-    "form-scraper": "0.0.4",
-    "pfsense-session": "^0.1.2",
+    "form-scraper": "https://github.com/austinkeeley/form-scraper/archive/v0.0.5.tar.gz",
     "promisified-request": "0.0.3",
     "request": "^2.69.0",
     "underscore": "^1.8.3"
